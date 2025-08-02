@@ -32,9 +32,9 @@ public class Worker : BackgroundService
         _logger.LogInformation("Worker running at: {Time}", DateTimeOffset.Now);
         _messageQueueClient.RegisterMessageHandler<UpdateOrderPaymentStatusMessage>(HandleEmailNotificationAsync, default, HandleExceptionWithMessageAsync); //TODO: pass CancellationToken to handler
         _logger.LogInformation("Worker stopped at: {Time}", DateTimeOffset.Now);
-	}
+    }
 
-	private async Task HandleEmailNotificationAsync(UpdateOrderPaymentStatusMessage message)
+    private async Task HandleEmailNotificationAsync(UpdateOrderPaymentStatusMessage message)
     {
         var (responseCode, note) = await _requestHandlingService.ProcessMessageAsync(message);
 

@@ -70,7 +70,7 @@ namespace OrderService.Services
 
             return new CheckoutOrderResponse
             {
-                OrderId = userId,
+                OrderId = order.Id,
                 Status = OrderStatus.PaymentPending,
                 UserId = userId,
             };
