@@ -51,7 +51,7 @@ All external dependencies (Payment Service Provider, Email Service, Production S
 
 ![aspire_apphost](docs/images/Aspire_AppHost.png)
 
-![frontend](docs/images/frontend.png)
+![frontend](docs/images/Frontend.png)
 
 5. Connect to MS SQL server from port 2433 for verifying stored data. The credentials can be found in Environment Variables of SQL server container.
 
