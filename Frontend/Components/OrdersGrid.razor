@@ -1,0 +1,148 @@
+@using Frontend.ExternalServices
+@using Frontend.Models
+@inject NavigationManager NavigationManager
+@inject IExternalOrderService orderService
+
+<PageTitle>Orders</PageTitle>
+
+<h3>Orders</h3>
+
+<div class="mb-3">
+    <input type="text" class="form-control" placeholder="Search by Name" @bind="searchString" />
+    <button class="btn btn-primary mt-2" @onclick="LoadOrders">Search</button>
+</div>
+
+@if (orders == null)
+{
+    <p>Loading...</p>
+}
+else if (!orders.Any())
+{
+    <p>No orders found.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Name</th>
+                <th>Status</th>
+                <th>Total Amount</th>
+                <th>Created At</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in orders)
+            {
+                <tr>
+                    <td>@order.Id</td>
+                    <td>@order.Name</td>
+                    <td>@order.Status</td>
+                    <td>@order.TotalAmount</td>
+                    <td>@order.CreatedAtUtc.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                    <td>
+                        @if (order.Status != Enums.OrderStatus.PaymentSuccess && order.Status != Enums.OrderStatus.PaymentPending)
+                        {
+                            <button class="btn btn-success" @onclick="() => Checkout(order.Id)">Checkout</button>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="d-flex justify-content-between align-items-center mt-3">
+        <button class="btn btn-secondary" @onclick="PreviousPage" disabled="@(!CanGoToPreviousPage)">Previous</button>
+        <span>Page @currentPage of @totalPages</span>
+        <button class="btn btn-secondary" @onclick="NextPage" disabled="@(!CanGoToNextPage)">Next</button>
+    </div>
+}
+
+@code {
+    private List<OrderDto>? orders;
+    private string searchString = string.Empty;
+    private int currentPage = 1;
+    private int pageSize = 10;
+    private int totalPages = 1;
+    private System.Timers.Timer? reloadTimer;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadOrders();
+        StartAutoReload();
+    }
+
+    private async Task LoadOrders()
+    {
+        try
+        {
+            var userId = Guid.Parse("5a2fb4b2-f281-4c64-8bbc-ec3500b40c76");
+            var response = await orderService.GetOrdersAsync(userId, searchString, currentPage, pageSize);
+
+            orders = response?.Data;
+            totalPages = response?.Pagination?.TotalPages ?? 0;
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error fetching orders: {ex.Message}");
+        }
+    }
+
+    private async Task PreviousPage()
+    {
+        if (currentPage > 1)
+        {
+            currentPage--;
+            await LoadOrders();
+        }
+    }
+
+    private async Task NextPage()
+    {
+        if (currentPage < totalPages)
+        {
+            currentPage++;
+            await LoadOrders();
+        }
+    }
+
+    private async Task Checkout(Guid orderId)
+    {
+        try
+        {
+            var userId = Guid.Parse("5a2fb4b2-f281-4c64-8bbc-ec3500b40c76");
+            await orderService.CheckoutOrderAsync(userId, orderId, new CheckoutOrderRequest() { PaymentProvider = "Ewallet" });
+            await LoadOrders(); // Refresh the orders after checkout
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error during checkout: {ex.Message}");
+        }
+    }
+
+    private bool CanGoToPreviousPage => currentPage > 1;
+    private bool CanGoToNextPage => currentPage < totalPages;
+
+    private void StartAutoReload()
+    {
+        reloadTimer = new System.Timers.Timer(2000);
+        reloadTimer.Elapsed += async (sender, args) =>
+        {
+            await InvokeAsync(async () =>
+            {
+                await LoadOrders();
+                StateHasChanged();
+            });
+        };
+        reloadTimer.AutoReset = true;
+        reloadTimer.Start();
+    }
+
+    public void Dispose()
+    {
+        reloadTimer?.Stop();
+        reloadTimer?.Dispose();
+    }
+}
