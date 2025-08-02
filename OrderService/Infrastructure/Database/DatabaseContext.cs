@@ -80,6 +80,12 @@ namespace OrderService.Infrastructure.Database
                 .HasMaxLength(32)
                 .HasConversion<string>();
 
+            modelBuilder.Entity<Order>()
+                .HasMany(o => o.OrderProcesses)
+                .WithOne(op => op.Order)
+                .HasForeignKey(op => op.OrderId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<OrderDetail>()
                 .HasKey(od => new { od.OrderId, od.ProductId });
 
@@ -122,6 +128,12 @@ namespace OrderService.Infrastructure.Database
                 .HasMany(o => o.ProcessJobs)
                 .WithOne(od => od.OrderProcess)
                 .HasForeignKey(od => od.ProcessId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<OrderProcess>()
+                .HasOne(op => op.Order)
+                .WithMany(o => o.OrderProcesses)
+                .HasForeignKey(op => op.OrderId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<OrderProcessJob>()

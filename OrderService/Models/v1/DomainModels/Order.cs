@@ -10,6 +10,7 @@ namespace OrderService.Models.v1.DomainModels
         public string? Name { get; set; }
         public decimal TotalAmount { get; set; }
         public OrderStatus Status { get; set;}
-        public ICollection<OrderDetail> OrderDetails { get; set; }
+        public ICollection<OrderDetail> OrderDetails { get; set; } = [];
+        public ICollection<OrderProcess> OrderProcesses { get; set; } = [];
     }
 }

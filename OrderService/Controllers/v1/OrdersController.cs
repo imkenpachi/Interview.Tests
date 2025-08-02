@@ -23,7 +23,6 @@ public class OrdersController : ControllerBase
 
     [HttpGet]
     [MapToApiVersion("1.0")]
-    [Route("")]
     [ProducesResponseType(typeof(PagedResponseDto<OrderDto>), (int)HttpStatusCode.OK)]
     public async Task<IActionResult> GetOrdersAsync(
         [FromRoute] Guid userId,
