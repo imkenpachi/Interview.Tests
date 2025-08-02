@@ -1,0 +1,6 @@
+@EwalletProviderMock_HostAddress = http://localhost:5105
+
+GET {{EwalletProviderMock_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
