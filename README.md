@@ -57,7 +57,9 @@ All external dependencies (Payment Service Provider, Email Service, Production S
 
 ![ms_sql_server_credentials](docs/images/MS_SQL_Server_Credentials.png)
 
+## System design document
 
+[Link to system design document](docs/SystemDesign.md)
 
 ## Time Tracking
 
